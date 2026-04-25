@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing T2: Economic Growth vs Sustainability — Essay Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6ef;
+    --ink: #1a1410;
+    --red: #c0392b;
+    --red-light: #f9e6e4;
+    --red-mid: #e8b4af;
+    --gold: #b5892a;
+    --gold-light: #fdf3dc;
+    --border: #d6cfc4;
+    --muted: #6b6058;
+    --green: #1e6e42;
+    --green-light: #e6f4ec;
+    --green-mid: #a8d5b8;
+    --blue: #1a4a7a;
+    --blue-light: #e6eef8;
+    --purple: #5b3fa0;
+    --purple-light: #f0ecfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 28px 48px;
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    border-bottom: 3px solid var(--gold);
+  }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+  header .meta { font-family: 'DM Mono', monospace; font-size: 0.73rem; color: #a89880; margin-left: auto; text-align: right; line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 0 32px; }
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 32px 0 12px;
+  }
+  .task-card {
+    background: white; border: 1px solid var(--border); border-left: 4px solid var(--gold);
+    padding: 20px 24px; font-size: 0.97rem; color: #333; line-height: 1.75;
+  }
+  .task-card .prompt { font-style: italic; margin-bottom: 10px; }
+  .task-card .instruction { font-weight: 600; font-size: 0.93rem; color: var(--ink); }
+  .notes-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 0; }
+  .note-pill {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 4px 11px;
+    background: var(--gold-light); border: 1px solid #e2d5b0; border-radius: 20px; color: var(--gold);
+  }
+
+  /* Category legend pills */
+  .cat-legend {
+    display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 0;
+    padding: 14px 18px; background: white; border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+  .cat-pill {
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 3px 10px;
+    border-radius: 12px; border: 1px solid; white-space: nowrap;
+  }
+  .cat-pill.LR  { background:#fff3e0; border-color:#f0c070; color:#7a4f00; }
+  .cat-pill.CC  { background:#e8f0fe; border-color:#aabfe8; color:#1a3a7a; }
+  .cat-pill.GR  { background:#fce8f3; border-color:#e8a8d0; color:#6a1040; }
+  .cat-pill.TR  { background:#e8f5e9; border-color:#a8d5b0; color:#1a5a2a; }
+  .cat-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); align-self: center; }
+
+  .essay-box { background: white; border: 1px solid var(--border); padding: 36px 40px; position: relative; }
+  .student-name {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted);
+    margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .essay-text { font-size: 1.01rem; line-height: 2.1; color: var(--ink); }
+  .essay-para { margin-bottom: 1.3em; }
+
+  /* Error spans — coloured by category */
+  .err {
+    border-bottom: 2px solid; cursor: pointer; border-radius: 2px;
+    padding: 1px 2px; transition: filter 0.15s;
+  }
+  .err:hover { filter: brightness(0.93); }
+  .err.active { filter: brightness(0.85); }
+  .err.LR  { background:#fff3e0; border-color:#f0c070; }
+  .err.CC  { background:#e8f0fe; border-color:#aabfe8; }
+  .err.GR  { background:#fce8f3; border-color:#e8a8d0; }
+  .err.TR  { background:#e8f5e9; border-color:#a8d5b0; }
+
+  /* Popover */
+  .popover {
+    display: none; position: absolute; z-index: 200; background: var(--ink); color: var(--cream);
+    border-radius: 4px; padding: 13px 16px; font-family: 'DM Mono', monospace; font-size: 0.76rem;
+    line-height: 1.6; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    pointer-events: none; white-space: normal;
+  }
+  .popover::after {
+    content:''; position:absolute; bottom:-7px; left:18px;
+    border:7px solid transparent; border-bottom:none; border-top-color:var(--ink);
+  }
+  .pop-cat-badge {
+    font-size:0.72rem; padding:4px 12px; border-radius:10px; font-weight:600; letter-spacing:0.05em; display:inline-block;
+  }
+  .pop-cat-badge.LR  { background:#f0c070; color:#7a4f00; }
+  .pop-cat-badge.CC  { background:#aabfe8; color:#1a3a7a; }
+  .pop-cat-badge.GR  { background:#e8a8d0; color:#6a1040; }
+  .pop-cat-badge.TR  { background:#a8d5b0; color:#1a5a2a; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 16px; margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid var(--border); align-items: center; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+  .legend-swatch { width: 16px; height: 9px; border-radius: 2px; border-bottom: 2px solid; }
+  .legend-swatch.LR { background:#fff3e0; border-color:#f0c070; }
+  .legend-swatch.CC { background:#e8f0fe; border-color:#aabfe8; }
+  .legend-swatch.GR { background:#fce8f3; border-color:#e8a8d0; }
+  .legend-swatch.TR { background:#e8f5e9; border-color:#a8d5b0; }
+  .legend-tip { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #aaa; font-style: italic; }
+
+  /* ── Correction Panel ── */
+  .correction-section { margin-top: 40px; background: white; border: 1px solid var(--border); border-top: 3px solid var(--blue); }
+  .correction-header {
+    background: var(--blue); color: white; padding: 16px 24px;
+    font-family: 'Playfair Display', serif; font-size: 1.05rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .correction-header span { font-family: 'DM Mono', monospace; font-size: 0.73rem; color: #aac4e8; font-weight: normal; margin-left: auto; }
+  .correction-body { padding: 28px 32px; }
+  .correction-intro { font-size: 0.88rem; color: var(--muted); margin-bottom: 24px; line-height: 1.7; font-family: 'DM Mono', monospace; }
+
+  .error-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .error-item { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; transition: border-color 0.2s; }
+  .error-item.corrected { border-color: var(--green-mid); }
+
+  .error-item-header { background: #f8f4ee; padding: 12px 16px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .error-phrase {
+    font-family: 'DM Mono', monospace; font-size: 0.77rem;
+    padding: 2px 7px; border-radius: 2px; border-bottom: 2px solid;
+  }
+  .error-phrase.LR { background:#fff3e0; border-color:#f0c070; color:#7a4f00; }
+  .error-phrase.CC { background:#e8f0fe; border-color:#aabfe8; color:#1a3a7a; }
+  .error-phrase.GR { background:#fce8f3; border-color:#e8a8d0; color:#6a1040; }
+  .error-phrase.TR { background:#e8f5e9; border-color:#a8d5b0; color:#1a5a2a; }
+
+  .error-cat-badge {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; padding: 2px 8px;
+    border-radius: 10px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  .error-cat-badge.LR { background:#f0c070; color:#7a4f00; }
+  .error-cat-badge.CC { background:#aabfe8; color:#1a3a7a; }
+  .error-cat-badge.GR { background:#e8a8d0; color:#6a1040; }
+  .error-cat-badge.TR { background:#a8d5b0; color:#1a5a2a; }
+
+  .correction-status { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--green); opacity: 0; transition: opacity 0.3s; }
+  .error-item.corrected .correction-status { opacity: 1; }
+
+  .error-item-body { padding: 12px 16px; display: flex; gap: 10px; align-items: flex-start; }
+  .correction-input {
+    flex: 1; font-family: 'Lora', serif; font-size: 0.92rem;
+    border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px;
+    background: var(--cream); color: var(--ink); resize: vertical; min-height: 44px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .correction-input:focus { border-color: var(--blue); }
+  .correction-input.has-value { border-color: var(--green-mid); background: var(--green-light); }
+
+  .submit-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 8px 16px;
+    background: var(--blue); color: white; border: none; border-radius: 3px;
+    cursor: pointer; white-space: nowrap; transition: background 0.15s; align-self: flex-end;
+  }
+  .submit-btn:hover { background: #1e5a9a; }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  .ai-feedback { display: none; margin: 0 16px 14px; border-radius: 4px; overflow: hidden; border: 1px solid #c8dcf0; }
+  .ai-feedback.visible { display: block; }
+  .ai-feedback-header {
+    background: var(--blue-light); padding: 8px 14px;
+    font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--blue);
+    letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+  }
+  .ai-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--blue); color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.64rem; }
+  .ai-feedback-body { padding: 14px 16px; font-size: 0.9rem; line-height: 1.75; color: var(--ink); background: white; }
+  .thinking { color: var(--muted); font-style: italic; font-family: 'DM Mono', monospace; font-size: 0.78rem; display: flex; align-items: center; gap: 8px; }
+  .dot-anim { display: inline-flex; gap: 3px; }
+  .dot-anim span { width: 5px; height: 5px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .dot-anim span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-anim span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+
+  .overall-submit-area { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .overall-submit-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.8rem; padding: 11px 24px;
+    background: var(--green); color: white; border: none; border-radius: 3px; cursor: pointer; transition: background 0.15s;
+  }
+  .overall-submit-btn:hover { background: #165432; }
+  .overall-submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .overall-hint { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+
+  .overall-feedback { display: none; margin-top: 20px; border: 1px solid #c8dcf0; border-radius: 4px; overflow: hidden; }
+  .overall-feedback.visible { display: block; }
+  .overall-feedback-header { background: var(--blue-light); padding: 10px 16px; font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .overall-feedback-body { padding: 18px 20px; font-size: 0.93rem; line-height: 1.8; color: var(--ink); background: white; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Writing Task 2 — Essay Review</h1>
+  <div class="meta">Student: Thảo &nbsp;|&nbsp; Economic Growth vs Sustainability</div>
+</header>
+
+<div class="container">
+
+  <div class="section-label">Task Prompt</div>
+  <div class="task-card">
+    <div class="prompt">Some people believe that economic growth is the only way to end poverty and hunger in the world, while others say that economic growth is causing damage to the environment and should be stopped.</div>
+    <div class="instruction">Discuss both views and give your own opinion.</div>
+    <div class="notes-row">
+      <span class="note-pill">Introduction: 5 min</span>
+      <span class="note-pill">Body 1: 15 min</span>
+      <span class="note-pill">Body 2: 15 min</span>
+      <span class="note-pill">Conclusion: 5 min</span>
+      <span class="note-pill">⚠ Không được dùng AI</span>
+    </div>
+  </div>
+
+  <div class="section-label">Error Categories</div>
+  <div class="cat-legend">
+    <span class="cat-label">Key:</span>
+    <span class="cat-pill LR">LR — Lexical Resource</span>
+    <span class="cat-pill CC">CC — Coherence & Cohesion</span>
+    <span class="cat-pill GR">GR — Grammatical Range</span>
+    <span class="cat-pill TR">TR — Task Response</span>
+  </div>
+
+  <div class="section-label">Student Essay — Click highlighted text for teacher comments</div>
+  <div class="essay-box">
+    <div class="student-name">Name: Thảo</div>
+
+    <div class="essay-text">
+
+      <div class="essay-para">
+        <span class="err LR" data-id="e1" data-cat="LR" data-phrase="Some people believe that economic growth is the only way to end poverty and hunger in the world, while others say that it can cause damage to the environment and should be stopped"
+          data-reason="Phải paraphrase đề bài chứ không được chép lại y hệt"
+          data-suggestion="Some people argue that economic growth is the most effective way to reduce poverty and food shortages worldwide, while others believe that it can harm the environment and should be controlled.">Some people believe that economic growth is the only way to end poverty and hunger in the world, while others say that it can cause damage to the environment and should be stopped</span>. In my opinion, economic development should not be completely stopped, but it must be carefully managed.
+      </div>
+
+      <div class="essay-para">
+        On the one hand, economic growth plays a crucial role in reducing poverty and hunger. <span class="err CC" data-id="e2" data-cat="CC" data-phrase="This development"
+          data-reason='"Sự phát triển kinh tế" bản thân là một khái niệm, chỉ cần dùng đại từ "nó" để thay thế, không cần dùng "sự phát triển này"'
+          data-suggestion="It">This development</span> can reduce income inequality by promoting economic opportunities. <span class="err CC" data-id="e3" data-cat="CC" data-phrase="As a result,"
+          data-reason='Câu này không phải câu nêu kết quả mà nó là giải thích cho luận điểm "promote economic opportunities", do đó dùng "as a result" không hợp lý'
+          data-suggestion='Bỏ "As a result,"'>As a result,</span> when new industries <span class="err LR" data-id="e4" data-cat="LR" data-phrase="are found"
+          data-reason=""
+          data-suggestion="are established">are found</span>, more jobs will be <span class="err LR" data-id="e5" data-cat="LR" data-phrase="created"
+          data-reason=""
+          data-suggestion="generated">created</span>. <span class="err CC" data-id="e6" data-cat="CC" data-phrase="According to this expansion of the economy, the unemployment rate will also decrease."
+          data-reason="Đây chỉ là một kết quả nhỏ mà em tách ra một câu mới rất dài dòng. Nếu là một ý dài thì tách ra câu mới là hợp lý, nhưng đây chỉ là một ý nhỏ về kết quả thì nên dùng mệnh đề quan hệ ghép với câu trước đó."
+          data-suggestion="... more jobs are created / generated, which leads to a decline in unemployment">According to this expansion of the economy, the unemployment rate will also decrease.</span> Many low-wage workers <span class="err LR" data-id="e7" data-cat="LR" data-phrase="can become a breadwinner"
+          data-reason="Cân nhắc kĩ khi dùng breadwinner vì nó là ngôn ngữ ẩn dụ, không phù hợp trong văn phong học thuật"
+          data-suggestion="are able to earn stable incomes">can become a breadwinner</span> with a stable income and support their family to meet basic living expenses. In addition, <span class="err CC" data-id="e8" data-cat="CC" data-phrase="this economic progress"
+          data-reason='"Sự phát triển kinh tế" bản thân đã là một khái niệm, không cần dùng "this"'
+          data-suggestion="economic progress">this economic progress</span> also reduces poverty and improves living standards. <span class="err GR" data-id="e9" data-cat="GR" data-phrase="Many people can be lifted out of poverty when the food shortage decreases and the national income increases."
+          data-reason="Câu này từ vựng tốt nhưng cần sửa cấu trúc câu"
+          data-suggestion="In many developing countries, economic growth has helped increased the national income and reduces food shortages, thereby lifting many people out of poverty.">Many people can be lifted out of poverty when the food shortage decreases and the national income increases.</span> <span class="err CC" data-id="e10" data-cat="CC" data-phrase="According to this, there will be more investment funds for healthcare, education, and social welfare, so that living standards and the quality of life"
+          data-reason='"According to" được dùng để tường thuật lời nói của người khác, không dùng để nêu ra kết quả'
+          data-suggestion='Khi thu nhập quốc dân tăng lên, chính phủ sẽ có nhiều nguồn vốn hơn để đầu tư vào... => "When the national income rises, governments will have more funds to invest in healthcare..."'>According to this, there will be more investment funds for healthcare, education, and social welfare, so that living standards and the quality of life</span> <span class="err GR" data-id="e11" data-cat="GR" data-phrase="can be more and more improved"
+          data-reason='"more and more" thường đi với adj (ví dụ more and more common)'
+          data-suggestion="can be significantly improved">can be more and more improved</span>.
+      </div>
+
+      <div class="essay-para">
+        On the other hand, uncontrolled economic growth <span class="err LR" data-id="e12" data-cat="LR" data-phrase="causes"
+          data-reason=""
+          data-suggestion="can result in">causes</span> serious environmental damage. <span class="err LR" data-id="e13" data-cat="LR" data-phrase="Economic growth"
+          data-reason='Lặp từ "Economic growth" hơi nhiều'
+          data-suggestion="Economic expansion">Economic growth</span> can contribute to environmental pollution in many ways. <span class="err LR" data-id="e14" data-cat="LR" data-phrase="When"
+          data-reason=""
+          data-suggestion="As">When</span> industries develop too quickly, factories produce large amounts of waste and harmful gases. These industrial activities <span class="err LR" data-id="e15" data-cat="LR" data-phrase="release toxic emissions into the air, rivers and soil"
+          data-reason='"emissions" là khí thải, khí thải thì chỉ thải vào không khí, không có thải vào nước và đất. Vì vậy phải thay từ "emissions" bằng từ có nghĩa rộng hơn'
+          data-suggestion="release toxic substances into the air, rivers and soil">release toxic emissions into the air, rivers and soil</span>, which cause serious air and water pollution. As a result, the natural environment is damaged and people's health may be affected. <span class="err TR" data-id="e16" data-cat="TR" data-phrase="The increase of pollution also leads to global warming and climate change."
+          data-reason='Đến chỗ "... people\'s health may be affected" là đã trọn vẹn một ý, không cần phải bày ra thêm ý "global warming and climate change" làm gì nữa.'
+          data-suggestion="Bỏ câu này">The increase of pollution also leads to global warming and climate change.</span> Additionally, <span class="err LR" data-id="e17" data-cat="LR" data-phrase="A large amount of demand for"
+          data-reason=""
+          data-suggestion="The growing demand for">A large amount of demand for</span> land, water and energy leads to deforestation and causes habitat destruction. Therefore, natural resources are becoming increasingly depleted.
+      </div>
+
+      <div class="essay-para">
+        <span class="err TR" data-id="e18" data-cat="TR" data-phrase="In conclusion, rather than pursuing economic growth at all costs, governments should focus on sustainable development to balance economic progress with environmental protection."
+          data-reason="Kết luận phải nhắc lại luận đề rồi mới đưa ra bài học. Em chưa nhắc lại luận đề mà đã đưa ra bài học."
+          data-suggestion="In conclusion, while economic growth remains essential, it should be carefully managed. Rather than pursuing economic growth at all costs, governments should focus on sustainable development to balance economic progress with environmental protection.">In conclusion, rather than pursuing economic growth at all costs, governments should focus on sustainable development to balance economic progress with environmental protection.</span>
+      </div>
+
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch LR"></div>LR</div>
+      <div class="legend-item"><div class="legend-swatch CC"></div>CC</div>
+      <div class="legend-item"><div class="legend-swatch GR"></div>GR</div>
+      <div class="legend-item"><div class="legend-swatch TR"></div>TR</div>
+      <div class="legend-tip">Click any highlighted phrase to see its error category</div>
+    </div>
+  </div>
+
+  <!-- ── Correction Panel ── -->
+  <div class="correction-section">
+    <div class="correction-header">
+      ✏️ Correct Your Errors
+      <span>Type your correction → get AI feedback</span>
+    </div>
+    <div class="correction-body">
+      <div class="correction-intro">
+        For each highlighted error below, type what you think the correct version should be. Then click <strong>Check</strong> to get instant AI feedback on your correction.
+      </div>
+      <div class="error-list" id="errorList"></div>
+
+      <div class="overall-submit-area">
+        <div class="overall-hint">When you've checked at least one error, get a summary evaluation of all your corrections.</div>
+        <button class="overall-submit-btn" id="overallSubmitBtn" disabled>Get Overall Feedback</button>
+        <div class="overall-feedback" id="overallFeedback">
+          <div class="overall-feedback-header"><span class="ai-badge">✦ AI</span> Overall Assessment</div>
+          <div class="overall-feedback-body" id="overallFeedbackBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Teacher popover -->
+<div class="popover" id="popover">
+  <span class="pop-cat-badge" id="popBadge"></span>
+</div>
+
+<script>
+// ── Error data (mirrors the marked-up essay spans) ──────────────────
+const ERRORS = [
+  { id:'e1',  cat:'LR', phrase:'Some people believe that economic growth is the only way to end poverty and hunger in the world, while others say that it can cause damage to the environment and should be stopped',
+    reason:'Phải paraphrase đề bài chứ không được chép lại y hệt',
+    suggestion:'Some people argue that economic growth is the most effective way to reduce poverty and food shortages worldwide, while others believe that it can harm the environment and should be controlled.' },
+  { id:'e2',  cat:'CC', phrase:'This development',
+    reason:'"Sự phát triển kinh tế" bản thân là một khái niệm, chỉ cần dùng đại từ "nó" để thay thế, không cần dùng "sự phát triển này"',
+    suggestion:'It' },
+  { id:'e3',  cat:'CC', phrase:'As a result,',
+    reason:'Câu này không phải câu nêu kết quả mà nó là giải thích cho luận điểm "promote economic opportunities", do đó dùng "as a result" không hợp lý',
+    suggestion:'Bỏ "As a result,"' },
+  { id:'e4',  cat:'LR', phrase:'are found',
+    reason:'',
+    suggestion:'are established' },
+  { id:'e5',  cat:'LR', phrase:'created',
+    reason:'',
+    suggestion:'generated' },
+  { id:'e6',  cat:'CC', phrase:'According to this expansion of the economy, the unemployment rate will also decrease.',
+    reason:'Đây chỉ là một kết quả nhỏ mà em tách ra một câu mới rất dài dòng. Ý nhỏ về kết quả thì nên dùng mệnh đề quan hệ ghép với câu trước đó.',
+    suggestion:'... more jobs are created / generated, which leads to a decline in unemployment' },
+  { id:'e7',  cat:'LR', phrase:'can become a breadwinner',
+    reason:'Cân nhắc kĩ khi dùng breadwinner vì nó là ngôn ngữ ẩn dụ, không phù hợp trong văn phong học thuật',
+    suggestion:'are able to earn stable incomes' },
+  { id:'e8',  cat:'CC', phrase:'this economic progress',
+    reason:'"Sự phát triển kinh tế" bản thân đã là một khái niệm, không cần dùng "this"',
+    suggestion:'economic progress' },
+  { id:'e9',  cat:'GR', phrase:'Many people can be lifted out of poverty when the food shortage decreases and the national income increases.',
+    reason:'Câu này từ vựng tốt nhưng cần sửa cấu trúc câu',
+    suggestion:'In many developing countries, economic growth has helped increased the national income and reduces food shortages, thereby lifting many people out of poverty.' },
+  { id:'e10', cat:'CC', phrase:'According to this, there will be more investment funds for healthcare, education, and social welfare, so that living standards and the quality of life',
+    reason:'"According to" được dùng để tường thuật lời nói của người khác, không dùng để nêu ra kết quả',
+    suggestion:'When the national income rises, governments will have more funds to invest in healthcare...' },
+  { id:'e11', cat:'GR', phrase:'can be more and more improved',
+    reason:'"more and more" thường đi với adj (ví dụ more and more common)',
+    suggestion:'can be significantly improved' },
+  { id:'e12', cat:'LR', phrase:'causes',
+    reason:'',
+    suggestion:'can result in' },
+  { id:'e13', cat:'LR', phrase:'Economic growth (second paragraph)',
+    reason:'Lặp từ "Economic growth" hơi nhiều',
+    suggestion:'Economic expansion' },
+  { id:'e14', cat:'LR', phrase:'When',
+    reason:'',
+    suggestion:'As' },
+  { id:'e15', cat:'LR', phrase:'release toxic emissions into the air, rivers and soil',
+    reason:'"emissions" là khí thải, khí thải thì chỉ thải vào không khí, không có thải vào nước và đất',
+    suggestion:'release toxic substances into the air, rivers and soil' },
+  { id:'e16', cat:'TR', phrase:'The increase of pollution also leads to global warming and climate change.',
+    reason:'Đến chỗ "... people\'s health may be affected" là đã trọn vẹn một ý, không cần phải bày ra thêm ý "global warming and climate change"',
+    suggestion:'Bỏ câu này' },
+  { id:'e17', cat:'LR', phrase:'A large amount of demand for',
+    reason:'',
+    suggestion:'The growing demand for' },
+  { id:'e18', cat:'TR', phrase:'In conclusion, rather than pursuing economic growth at all costs, governments should focus on sustainable development to balance economic progress with environmental protection.',
+    reason:'Kết luận phải nhắc lại luận đề rồi mới đưa ra bài học. Em chưa nhắc lại luận đề mà đã đưa ra bài học.',
+    suggestion:'In conclusion, while economic growth remains essential, it should be carefully managed. Rather than pursuing economic growth at all costs, governments should focus on sustainable development to balance economic progress with environmental protection.' },
+];
+
+const CAT_FULL = { LR:'Lexical Resource', CC:'Coherence & Cohesion', GR:'Grammatical Range', TR:'Task Response' };
+
+// ── Build correction list ───────────────────────────────────────────
+const errorList = document.getElementById('errorList');
+const corrections = {};
+
+ERRORS.forEach(err => {
+  corrections[err.id] = { value:'', feedbackGiven:false };
+
+  const item = document.createElement('div');
+  item.className = 'error-item';
+  item.id = 'item-' + err.id;
+
+  const shortPhrase = err.phrase.length > 70 ? err.phrase.slice(0,70)+'…' : err.phrase;
+
+  item.innerHTML = `
+    <div class="error-item-header">
+      <span class="error-phrase ${err.cat}">${escHtml(shortPhrase)}</span>
+      <span class="error-cat-badge ${err.cat}">${err.cat} — ${CAT_FULL[err.cat]}</span>
+      <span class="correction-status" id="status-${err.id}">✓ Checked</span>
+    </div>
+    <div class="error-item-body">
+      <textarea class="correction-input" id="input-${err.id}" rows="2"
+        placeholder="Type your correction here…"></textarea>
+      <button class="submit-btn" id="btn-${err.id}">Check</button>
+    </div>
+    <div class="ai-feedback" id="fb-${err.id}">
+      <div class="ai-feedback-header"><span class="ai-badge">✦ AI</span> Feedback</div>
+      <div class="ai-feedback-body" id="fb-body-${err.id}"></div>
+    </div>`;
+  errorList.appendChild(item);
+
+  const input = document.getElementById('input-' + err.id);
+  const btn   = document.getElementById('btn-'   + err.id);
+
+  input.addEventListener('input', () => {
+    corrections[err.id].value = input.value.trim();
+    input.classList.toggle('has-value', input.value.trim().length > 0);
+    checkOverallReady();
+  });
+  btn.addEventListener('click', () => checkError(err));
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Check individual error ──────────────────────────────────────────
+async function checkError(err) {
+  const input  = document.getElementById('input-'   + err.id);
+  const btn    = document.getElementById('btn-'     + err.id);
+  const fbDiv  = document.getElementById('fb-'      + err.id);
+  const fbBody = document.getElementById('fb-body-' + err.id);
+  const status = document.getElementById('status-'  + err.id);
+  const item   = document.getElementById('item-'    + err.id);
+
+  const studentAnswer = input.value.trim();
+  if (!studentAnswer) { input.focus(); return; }
+
+  btn.disabled = true; btn.textContent = '…';
+  fbDiv.classList.add('visible');
+  fbBody.innerHTML = `<div class="thinking">Thinking <div class="dot-anim"><span></span><span></span><span></span></div></div>`;
+
+  const catFull = CAT_FULL[err.cat];
+  const reasonPart = err.reason ? `\nTeacher's reason: "${err.reason}"` : '';
+  const suggPart   = err.suggestion ? `\nTeacher's suggested correction: "${err.suggestion}"` : '';
+
+  const prompt = `You are an IELTS Writing Task 2 teacher. A student is correcting an error in their essay about economic growth vs sustainability.
+
+Error category: ${err.cat} (${catFull})
+Original error: "${err.phrase}"${reasonPart}${suggPart}
+
+Student's correction attempt: "${studentAnswer}"
+
+Give concise, encouraging feedback in 2–4 sentences.
+- If correct or close to the teacher's suggestion: confirm and briefly explain why it works.
+- If partially correct: acknowledge what's right, point out what still needs work, give a hint.
+- If incorrect: gently say so, explain the issue, and guide toward the right answer without giving it away directly.
+Write in plain prose, no bullet points or markdown headers. Be specific about the ${catFull} criterion.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b=>b.text||'').join('') || 'Could not get feedback. Please try again.';
+    fbBody.textContent = text;
+    corrections[err.id].feedbackGiven = true;
+    item.classList.add('corrected');
+    status.style.opacity = 1;
+    checkOverallReady();
+  } catch(e) {
+    fbBody.textContent = 'Network error. Please check your connection and try again.';
+  }
+  btn.disabled = false; btn.textContent = 'Re-check';
+}
+
+// ── Overall feedback ────────────────────────────────────────────────
+function checkOverallReady() {
+  const any = Object.values(corrections).some(c=>c.feedbackGiven);
+  document.getElementById('overallSubmitBtn').disabled = !any;
+}
+
+document.getElementById('overallSubmitBtn').addEventListener('click', async () => {
+  const btn    = document.getElementById('overallSubmitBtn');
+  const fbDiv  = document.getElementById('overallFeedback');
+  const fbBody = document.getElementById('overallFeedbackBody');
+
+  btn.disabled = true; btn.textContent = 'Analysing…';
+  fbDiv.classList.add('visible');
+  fbBody.innerHTML = `<div class="thinking">Analysing all your corrections <div class="dot-anim"><span></span><span></span><span></span></div></div>`;
+
+  const summary = ERRORS.map(err => {
+    const val = corrections[err.id].value || '(not attempted)';
+    return `[${err.cat}] "${err.phrase}" → Student wrote: "${val}"`;
+  }).join('\n');
+
+  const prompt = `You are an IELTS Writing Task 2 teacher. A student corrected errors in their essay on economic growth vs sustainability. The errors span four categories: LR (Lexical Resource), CC (Coherence & Cohesion), GR (Grammatical Range), TR (Task Response).
+
+Student corrections:
+${summary}
+
+Write an overall assessment (5–7 sentences) that:
+1. States how many errors they corrected successfully (approximate).
+2. Highlights which error categories they handled well.
+3. Identifies which categories still need work.
+4. Gives one specific, actionable piece of advice.
+Tone: warm, constructive, encouraging. Plain prose only, no bullet points.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b=>b.text||'').join('') || 'Could not get feedback.';
+    fbBody.textContent = text;
+  } catch(e) {
+    fbBody.textContent = 'Network error. Please try again.';
+  }
+  btn.disabled = false; btn.textContent = 'Refresh Overall Feedback';
+});
+
+// ── Teacher popover ─────────────────────────────────────────────────
+const popover  = document.getElementById('popover');
+const popBadge = document.getElementById('popBadge');
+let activeEl   = null;
+
+document.querySelectorAll('.err').forEach(el => {
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (activeEl && activeEl !== this) activeEl.classList.remove('active');
+    if (this.classList.contains('active')) {
+      this.classList.remove('active');
+      popover.style.display = 'none';
+      activeEl = null; return;
+    }
+    this.classList.add('active');
+    activeEl = this;
+
+    const cat = this.dataset.cat;
+    popBadge.textContent = cat + ' — ' + CAT_FULL[cat];
+    popBadge.className   = 'pop-cat-badge ' + cat;
+
+    positionPopover(this);
+    popover.style.display = 'block';
+  });
+});
+
+document.addEventListener('click', () => {
+  if (activeEl) { activeEl.classList.remove('active'); activeEl = null; }
+  popover.style.display = 'none';
+});
+window.addEventListener('scroll', () => { if (activeEl) positionPopover(activeEl); });
+
+function positionPopover(el) {
+  const rect = el.getBoundingClientRect();
+  const sy   = window.scrollY || window.pageYOffset;
+  popover.style.display = 'block';
+  const pw = popover.offsetWidth;
+  let left = rect.left + (window.scrollX || 0);
+  if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+  if (left < 8) left = 8;
+  popover.style.left = left + 'px';
+  popover.style.top  = (rect.top + sy - popover.offsetHeight - 12) + 'px';
+}
+</script>
+</body>
+</html>
