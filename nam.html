@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing T2: Junk Food — AI Essay Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2333;
+    --border: #2a3048;
+    --text: #dde3f0;
+    --muted: #7a85a0;
+    --gold: #e8b84b;
+    --gold-dim: #3a3010;
+
+    --LR: #e8844b;
+    --LR-bg: #2a1a0e;
+    --LR-border: #6a3010;
+    --CC: #4b9ee8;
+    --CC-bg: #0e1e2a;
+    --CC-border: #10406a;
+    --GR: #e84b8a;
+    --GR-bg: #2a0e1a;
+    --GR-border: #6a1040;
+    --TR: #4be88a;
+    --TR-bg: #0e2a1a;
+    --TR-border: #10602a;
+
+    --green: #3dd68c;
+    --green-bg: #0e2a1a;
+    --blue: #4b9ee8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .header-mark {
+    width: 36px; height: 36px; background: var(--gold); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 0.85rem; color: #1a1200;
+  }
+  header h1 { font-size: 1.1rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
+  header .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .ai-status {
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted);
+  }
+  .ai-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--muted);
+    transition: background 0.3s;
+  }
+  .ai-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .ai-dot.thinking { background: var(--gold); box-shadow: 0 0 6px var(--gold); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+    margin: 36px 0 12px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── Task card ── */
+  .task-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 20px 24px; border-radius: 4px;
+  }
+  .task-prompt { font-style: italic; font-size: 0.95rem; color: #b0bcd4; line-height: 1.75; margin-bottom: 10px; }
+  .task-instruction { font-weight: 600; font-size: 0.92rem; color: var(--text); }
+
+  /* ── Category legend ── */
+  .cat-legend {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    padding: 12px 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  }
+  .cat-pill {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.67rem;
+    padding: 3px 10px; border-radius: 3px; border: 1px solid; white-space: nowrap; font-weight: 500;
+  }
+  .cat-pill.LR { background: var(--LR-bg); border-color: var(--LR-border); color: var(--LR); }
+  .cat-pill.CC { background: var(--CC-bg); border-color: var(--CC-border); color: var(--CC); }
+  .cat-pill.GR { background: var(--GR-bg); border-color: var(--GR-border); color: var(--GR); }
+  .cat-pill.TR { background: var(--TR-bg); border-color: var(--TR-border); color: var(--TR); }
+  .cat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+
+  /* ── Essay box ── */
+  .essay-box {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 36px 40px; border-radius: 4px; position: relative;
+  }
+  .essay-loading {
+    text-align: center; padding: 60px 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted);
+  }
+  .loading-bar {
+    width: 200px; height: 3px; background: var(--border); border-radius: 2px;
+    margin: 16px auto 0; overflow: hidden;
+  }
+  .loading-bar-inner {
+    height: 100%; width: 40%; background: var(--gold); border-radius: 2px;
+    animation: slide 1.4s ease-in-out infinite;
+  }
+  @keyframes slide { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+
+  .essay-text { font-size: 1rem; line-height: 2.1; color: var(--text); display: none; }
+  .essay-text.ready { display: block; }
+  .essay-para { margin-bottom: 1.4em; }
+
+  /* ── Error highlights ── */
+  .err {
+    border-bottom: 2px solid; cursor: pointer; border-radius: 2px;
+    padding: 1px 2px; transition: filter 0.15s;
+  }
+  .err:hover { filter: brightness(1.25); }
+  .err.active { filter: brightness(1.4); outline: 1px solid currentColor; outline-offset: 1px; }
+  .err.LR { background: var(--LR-bg); border-color: var(--LR); color: #f0a878; }
+  .err.CC { background: var(--CC-bg); border-color: var(--CC); color: #80c0f0; }
+  .err.GR { background: var(--GR-bg); border-color: var(--GR); color: #f080b0; }
+  .err.TR { background: var(--TR-bg); border-color: var(--TR); color: #70e8a0; }
+
+  /* ── Popover ── */
+  .popover {
+    display: none; position: absolute; z-index: 300;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+  .popover::after {
+    content:''; position:absolute; bottom:-7px; left:18px;
+    border:7px solid transparent; border-bottom:none; border-top-color:var(--surface2);
+  }
+  .pop-cat-badge {
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 3px;
+    border: 1px solid; font-weight: 500; display: inline-block;
+  }
+  .pop-cat-badge.LR { background:var(--LR-bg); border-color:var(--LR-border); color:var(--LR); }
+  .pop-cat-badge.CC { background:var(--CC-bg); border-color:var(--CC-border); color:var(--CC); }
+  .pop-cat-badge.GR { background:var(--GR-bg); border-color:var(--GR-border); color:var(--GR); }
+  .pop-cat-badge.TR { background:var(--TR-bg); border-color:var(--TR-border); color:var(--TR); }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; gap: 14px; margin-top: 24px; padding-top: 18px;
+    border-top: 1px solid var(--border); align-items: center; flex-wrap: wrap;
+  }
+  .legend-item { display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:0.67rem; color:var(--muted); }
+  .legend-swatch { width:14px; height:8px; border-radius:2px; border-bottom:2px solid; }
+  .legend-swatch.LR { background:var(--LR-bg); border-color:var(--LR); }
+  .legend-swatch.CC { background:var(--CC-bg); border-color:var(--CC); }
+  .legend-swatch.GR { background:var(--GR-bg); border-color:var(--GR); }
+  .legend-swatch.TR { background:var(--TR-bg); border-color:var(--TR); }
+  .legend-tip { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:#444d66; font-style:italic; }
+
+  /* ── Correction panel ── */
+  .correction-section {
+    margin-top: 36px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 2px solid var(--blue); border-radius: 4px; overflow: hidden;
+  }
+  .correction-header {
+    background: #0d1e3a; padding: 16px 24px;
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--blue);
+    letter-spacing: 0.05em; border-bottom: 1px solid var(--border);
+  }
+  .correction-header span { margin-left:auto; color:var(--muted); font-size:0.68rem; }
+  .correction-body { padding: 24px 28px; }
+  .correction-intro {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted);
+    margin-bottom: 20px; line-height: 1.7;
+  }
+  .no-errors-msg {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    color: var(--green); text-align: center; padding: 20px;
+    display: none;
+  }
+
+  .error-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .error-item {
+    border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .error-item.corrected { border-color: #10602a; }
+
+  .error-item-header {
+    padding: 10px 14px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    background: #13171f;
+  }
+  .error-phrase-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    padding: 2px 7px; border-radius: 3px; border: 1px solid;
+    max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .error-phrase-label.LR { background:var(--LR-bg); border-color:var(--LR-border); color:var(--LR); }
+  .error-phrase-label.CC { background:var(--CC-bg); border-color:var(--CC-border); color:var(--CC); }
+  .error-phrase-label.GR { background:var(--GR-bg); border-color:var(--GR-border); color:var(--GR); }
+  .error-phrase-label.TR { background:var(--TR-bg); border-color:var(--TR-border); color:var(--TR); }
+
+  .error-cat-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.63rem;
+    padding: 2px 8px; border-radius: 3px; border: 1px solid; font-weight: 500;
+  }
+  .error-cat-badge.LR { background:var(--LR-bg); border-color:var(--LR-border); color:var(--LR); }
+  .error-cat-badge.CC { background:var(--CC-bg); border-color:var(--CC-border); color:var(--CC); }
+  .error-cat-badge.GR { background:var(--GR-bg); border-color:var(--GR-border); color:var(--GR); }
+  .error-cat-badge.TR { background:var(--TR-bg); border-color:var(--TR-border); color:var(--TR); }
+
+  .correction-status { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--green); opacity:0; transition:opacity 0.3s; }
+  .error-item.corrected .correction-status { opacity:1; }
+
+  .error-item-body { padding: 10px 14px; display:flex; gap:10px; align-items:flex-start; background:var(--surface); }
+  .correction-input {
+    flex:1; font-family:'Source Serif 4',serif; font-size:0.9rem;
+    border:1px solid var(--border); border-radius:3px; padding:8px 12px;
+    background:#0f1117; color:var(--text); resize:vertical; min-height:42px;
+    outline:none; transition:border-color 0.2s;
+  }
+  .correction-input:focus { border-color:var(--blue); }
+  .correction-input.has-value { border-color:#10602a; background:#0d1e14; }
+
+  .submit-btn {
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; padding:8px 14px;
+    background:#0d1e3a; color:var(--blue); border:1px solid var(--CC-border);
+    border-radius:3px; cursor:pointer; white-space:nowrap; transition:all 0.15s;
+    align-self:flex-end;
+  }
+  .submit-btn:hover { background:#122a52; border-color:var(--blue); }
+  .submit-btn:disabled { background:var(--surface2); color:var(--muted); border-color:var(--border); cursor:not-allowed; }
+
+  /* AI feedback */
+  .ai-feedback { display:none; margin:0 14px 12px; border-radius:3px; overflow:hidden; border:1px solid #10406a; }
+  .ai-feedback.visible { display:block; }
+  .ai-feedback-header {
+    background:#0a1828; padding:7px 12px;
+    font-family:'JetBrains Mono',monospace; font-size:0.63rem; color:var(--blue);
+    letter-spacing:0.08em; text-transform:uppercase; display:flex; align-items:center; gap:7px;
+  }
+  .ai-badge { display:inline-flex; align-items:center; background:var(--blue); color:#0a1828; border-radius:8px; padding:1px 7px; font-size:0.6rem; font-weight:500; }
+  .ai-feedback-body { padding:12px 14px; font-size:0.88rem; line-height:1.75; color:var(--text); background:var(--surface); }
+  .thinking { color:var(--muted); font-style:italic; font-family:'JetBrains Mono',monospace; font-size:0.75rem; display:flex; align-items:center; gap:8px; }
+  .dot-anim { display:inline-flex; gap:3px; }
+  .dot-anim span { width:4px; height:4px; background:var(--muted); border-radius:50%; animation:bounce 1.2s infinite; }
+  .dot-anim span:nth-child(2){animation-delay:.2s}
+  .dot-anim span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+  /* Overall */
+  .overall-submit-area { margin-top:24px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+  .overall-submit-btn {
+    font-family:'JetBrains Mono',monospace; font-size:0.75rem; padding:10px 22px;
+    background:var(--green-bg); color:var(--green); border:1px solid #10602a;
+    border-radius:3px; cursor:pointer; transition:all 0.15s; align-self:flex-start;
+  }
+  .overall-submit-btn:hover { background:#122a1a; border-color:var(--green); }
+  .overall-submit-btn:disabled { background:var(--surface2); color:var(--muted); border-color:var(--border); cursor:not-allowed; }
+  .overall-hint { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--muted); }
+
+  .overall-feedback { display:none; margin-top:16px; border:1px solid #10406a; border-radius:3px; overflow:hidden; }
+  .overall-feedback.visible { display:block; }
+  .overall-feedback-header { background:#0a1828; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.63rem; color:var(--blue); letter-spacing:0.08em; text-transform:uppercase; display:flex; align-items:center; gap:7px; }
+  .overall-feedback-body { padding:16px 18px; font-size:0.9rem; line-height:1.8; color:var(--text); background:var(--surface); white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-mark">T2</div>
+  <div>
+    <h1>AI Essay Review</h1>
+    <div class="subtitle">Writing Task 2 — Junk Food &amp; Education</div>
+  </div>
+  <div class="ai-status">
+    <div class="ai-dot thinking" id="aiDot"></div>
+    <span id="aiStatusText">Analysing essay…</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="section-label">Task Prompt</div>
+  <div class="task-card">
+    <div class="task-prompt">Scientists agree that many people eat too much junk food and it is damaging their health. Some people think that this problem can be solved by education, while others believe that this education will not work.</div>
+    <div class="task-instruction">Discuss both views and give your opinion.</div>
+  </div>
+
+  <div class="section-label">Error Categories</div>
+  <div class="cat-legend">
+    <span class="cat-label">Key:</span>
+    <span class="cat-pill LR">LR — Lexical Resource</span>
+    <span class="cat-pill CC">CC — Coherence &amp; Cohesion</span>
+    <span class="cat-pill GR">GR — Grammatical Range &amp; Accuracy</span>
+    <span class="cat-pill TR">TR — Task Response</span>
+  </div>
+
+  <div class="section-label">Student Essay — AI highlights errors; click to see category</div>
+  <div class="essay-box">
+    <div class="essay-loading" id="essayLoading">
+      <div>✦ AI is reading and annotating the essay…</div>
+      <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+    </div>
+    <div class="essay-text" id="essayText"></div>
+    <div class="legend" id="essayLegend" style="display:none;">
+      <div class="legend-item"><div class="legend-swatch LR"></div>LR</div>
+      <div class="legend-item"><div class="legend-swatch CC"></div>CC</div>
+      <div class="legend-item"><div class="legend-swatch GR"></div>GR</div>
+      <div class="legend-item"><div class="legend-swatch TR"></div>TR</div>
+      <div class="legend-tip">Click any highlight to see its error category</div>
+    </div>
+  </div>
+
+  <!-- Correction panel -->
+  <div class="correction-section" id="correctionSection" style="display:none;">
+    <div class="correction-header">
+      ✏ Self-Correction Practice
+      <span>Type your correction → get AI feedback</span>
+    </div>
+    <div class="correction-body">
+      <div class="correction-intro" id="correctionIntro">
+        Each highlighted error is listed below. Type what you think the correct version should be, then click <strong>Check</strong> for instant feedback.
+      </div>
+      <div class="no-errors-msg" id="noErrorsMsg">✦ No errors detected — great writing!</div>
+      <div class="error-list" id="errorList"></div>
+      <div class="overall-submit-area" id="overallArea" style="display:none;">
+        <div class="overall-hint">After checking at least one error, get a full assessment of your corrections.</div>
+        <button class="overall-submit-btn" id="overallSubmitBtn" disabled>Get Overall Feedback</button>
+        <div class="overall-feedback" id="overallFeedback">
+          <div class="overall-feedback-header"><span class="ai-badge">✦ AI</span> Overall Assessment</div>
+          <div class="overall-feedback-body" id="overallFeedbackBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Popover -->
+<div class="popover" id="popover">
+  <span class="pop-cat-badge" id="popBadge"></span>
+</div>
+
+<script>
+const ESSAY_RAW = `Nowadays, many experts argue that the overconsumption of junk food is seriously harmful on people health. While some people believe that this issue can be effectively solved through educational classes, other maintain that just education alone is not sure can be change eating habbits. In my opinion, I agree that education is essential, but it alone cannot solve this problem.
+
+On the one hand, educating people can make them less consume fast food by hightlighting the risks associated with eating fast food, helping people make healthier choices. This can help everyone aware of the effects of junk food bring such as obesity and many overweight diseases. By raising awareness, educational compains can encourage people to reduce the amount of fast food consumption
+
+However, only education is not enough to change people eating habit so other factors are needed, such as government action. People know that junk food is bad for their health but still choose to eat it because it is cheap and convenient. While, healthy food are not always available or affortable, especially in big city. Therefore, government should public higher taxes for junk food and lower for high nutritional food. This can help all the people that cannot afford healthy food can consume nutritional food and improve their health significantly.
+
+In conclusion, education is important but not enough by itself. It need a combined with the government to have a greater impact on reducing junk food consumption and improving people health`;
+
+const CAT_FULL = {
+  LR: 'Lexical Resource',
+  CC: 'Coherence & Cohesion',
+  GR: 'Grammatical Range & Accuracy',
+  TR: 'Task Response'
+};
+
+// State
+let ERRORS = [];
+let corrections = {};
+let activeEl = null;
+
+// ── Step 1: Call AI to annotate the essay ──────────────────────────
+async function analyseEssay() {
+  const prompt = `You are an expert IELTS examiner. Analyse the following IELTS Writing Task 2 essay and identify all significant errors across these four categories:
+- LR (Lexical Resource): wrong word choice, informal language, spelling errors, imprecise vocabulary
+- CC (Coherence & Cohesion): poor connectors, wrong discourse markers, unclear referencing, paragraph structure problems
+- GR (Grammatical Range & Accuracy): grammar mistakes, wrong tense, subject-verb agreement, missing articles, wrong prepositions, sentence structure errors
+- TR (Task Response): failure to address the task, missing views, unsupported claims, irrelevant content, conclusion issues
+
+For each error, output a JSON object. Return ONLY a valid JSON array — no markdown, no explanation, no code fences.
+
+Each object must have exactly these fields:
+- "phrase": the exact substring from the essay that is problematic (copy it verbatim, keep it SHORT — ideally 2–8 words, max 12 words)
+- "cat": one of "LR", "CC", "GR", "TR"
+
+Rules:
+- "phrase" must match the essay text EXACTLY (case-sensitive, same whitespace)
+- Do not overlap phrases — each error should be a distinct phrase
+- Identify 10–18 errors total
+- Focus on the most impactful errors for IELTS scoring
+- Do not duplicate the same phrase
+
+Essay:
+${ESSAY_RAW}
+
+Return only the JSON array.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  const data = await res.json();
+  const raw = data.content?.map(b => b.text || '').join('') || '[]';
+  // Strip any accidental markdown fences
+  const cleaned = raw.replace(/```json|```/g, '').trim();
+  return JSON.parse(cleaned);
+}
+
+// ── Step 2: Render essay with highlighted spans ────────────────────
+function renderEssay(errors) {
+  const essayEl   = document.getElementById('essayText');
+  const loadingEl = document.getElementById('essayLoading');
+  const legendEl  = document.getElementById('essayLegend');
+
+  // Sort errors by position in essay
+  const sorted = [...errors].sort((a, b) => {
+    const posA = ESSAY_RAW.indexOf(a.phrase);
+    const posB = ESSAY_RAW.indexOf(b.phrase);
+    return posA - posB;
+  });
+
+  // Deduplicate: remove errors whose phrase wasn't found or overlaps a previous one
+  const used = [];
+  const deduped = [];
+  for (const err of sorted) {
+    const pos = ESSAY_RAW.indexOf(err.phrase);
+    if (pos === -1) continue; // phrase not found in essay
+    const end = pos + err.phrase.length;
+    const overlaps = used.some(([s, e]) => pos < e && end > s);
+    if (!overlaps) {
+      used.push([pos, end]);
+      deduped.push({ ...err, pos, end });
+    }
+  }
+
+  // Build annotated HTML paragraph by paragraph
+  const paragraphs = ESSAY_RAW.split('\n\n');
+  let cursor = 0;
+  let html = '';
+  let errorIndex = 0;
+
+  for (const para of paragraphs) {
+    const paraStart = cursor;
+    const paraEnd   = cursor + para.length;
+    let paraHtml = '';
+    let p = 0;
+
+    // Find errors within this paragraph
+    const paraErrors = deduped.filter(e => e.pos >= paraStart && e.end <= paraEnd);
+
+    for (const err of paraErrors) {
+      const localStart = err.pos - paraStart;
+      const localEnd   = err.end - paraStart;
+      // Text before this error
+      paraHtml += escHtml(para.slice(p, localStart));
+      // The highlighted span
+      paraHtml += `<span class="err ${err.cat}" data-id="${err.id}" data-cat="${err.cat}">${escHtml(para.slice(localStart, localEnd))}</span>`;
+      p = localEnd;
+    }
+    // Remaining text in paragraph
+    paraHtml += escHtml(para.slice(p));
+    html += `<div class="essay-para">${paraHtml}</div>`;
+    cursor = paraEnd + 2; // +2 for \n\n
+  }
+
+  essayEl.innerHTML = html;
+  loadingEl.style.display = 'none';
+  essayEl.classList.add('ready');
+  legendEl.style.display = 'flex';
+
+  // Attach popover listeners
+  document.querySelectorAll('.err').forEach(el => {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (activeEl && activeEl !== this) activeEl.classList.remove('active');
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+        document.getElementById('popover').style.display = 'none';
+        activeEl = null; return;
+      }
+      this.classList.add('active');
+      activeEl = this;
+      const cat = this.dataset.cat;
+      const badge = document.getElementById('popBadge');
+      badge.textContent = cat + ' — ' + CAT_FULL[cat];
+      badge.className = 'pop-cat-badge ' + cat;
+      positionPopover(this);
+      document.getElementById('popover').style.display = 'block';
+    });
+  });
+
+  document.addEventListener('click', () => {
+    if (activeEl) { activeEl.classList.remove('active'); activeEl = null; }
+    document.getElementById('popover').style.display = 'none';
+  });
+  window.addEventListener('scroll', () => { if (activeEl) positionPopover(activeEl); });
+}
+
+// ── Step 3: Build correction panel ────────────────────────────────
+function buildCorrectionPanel(errors) {
+  const panel    = document.getElementById('correctionSection');
+  const listEl   = document.getElementById('errorList');
+  const noErrEl  = document.getElementById('noErrorsMsg');
+  const areaEl   = document.getElementById('overallArea');
+  panel.style.display = 'block';
+
+  if (errors.length === 0) {
+    noErrEl.style.display = 'block';
+    document.getElementById('correctionIntro').style.display = 'none';
+    return;
+  }
+
+  areaEl.style.display = 'block';
+
+  errors.forEach((err, i) => {
+    corrections[err.id] = { value: '', feedbackGiven: false };
+
+    const item = document.createElement('div');
+    item.className = 'error-item';
+    item.id = 'item-' + err.id;
+
+    const shortPhrase = err.phrase.length > 60 ? err.phrase.slice(0,60)+'…' : err.phrase;
+
+    item.innerHTML = `
+      <div class="error-item-header">
+        <span class="error-phrase-label ${err.cat}">${escHtml(shortPhrase)}</span>
+        <span class="error-cat-badge ${err.cat}">${err.cat} — ${CAT_FULL[err.cat]}</span>
+        <span class="correction-status" id="status-${err.id}">✓ checked</span>
+      </div>
+      <div class="error-item-body">
+        <textarea class="correction-input" id="input-${err.id}" rows="2"
+          placeholder="Type your correction here…"></textarea>
+        <button class="submit-btn" id="btn-${err.id}">Check</button>
+      </div>
+      <div class="ai-feedback" id="fb-${err.id}">
+        <div class="ai-feedback-header"><span class="ai-badge">✦ AI</span> Feedback</div>
+        <div class="ai-feedback-body" id="fb-body-${err.id}"></div>
+      </div>`;
+    listEl.appendChild(item);
+
+    const input = document.getElementById('input-' + err.id);
+    const btn   = document.getElementById('btn-'   + err.id);
+
+    input.addEventListener('input', () => {
+      corrections[err.id].value = input.value.trim();
+      input.classList.toggle('has-value', input.value.trim().length > 0);
+      checkOverallReady();
+    });
+    btn.addEventListener('click', () => checkSingleError(err));
+  });
+}
+
+// ── Check individual error ─────────────────────────────────────────
+async function checkSingleError(err) {
+  const input  = document.getElementById('input-'   + err.id);
+  const btn    = document.getElementById('btn-'     + err.id);
+  const fbDiv  = document.getElementById('fb-'      + err.id);
+  const fbBody = document.getElementById('fb-body-' + err.id);
+  const status = document.getElementById('status-'  + err.id);
+  const item   = document.getElementById('item-'    + err.id);
+
+  const studentAnswer = input.value.trim();
+  if (!studentAnswer) { input.focus(); return; }
+
+  btn.disabled = true; btn.textContent = '…';
+  fbDiv.classList.add('visible');
+  fbBody.innerHTML = `<div class="thinking">Thinking <div class="dot-anim"><span></span><span></span><span></span></div></div>`;
+
+  const prompt = `You are an IELTS Writing Task 2 examiner. A student is correcting an error in their essay about junk food and education.
+
+Error category: ${err.cat} (${CAT_FULL[err.cat]})
+Original error phrase: "${err.phrase}"
+Context in essay: "${getContext(err.phrase)}"
+
+Student's correction: "${studentAnswer}"
+
+Give concise, encouraging feedback in 2–4 sentences:
+- If correct: confirm and briefly explain why it works.
+- If partially correct: acknowledge what's right and give a gentle hint about what still needs fixing.
+- If incorrect: gently explain the issue and guide toward the right answer without giving it away.
+Focus specifically on the ${CAT_FULL[err.cat]} criterion. Write in plain prose, no bullet points.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Could not get feedback.';
+    fbBody.textContent = text;
+    corrections[err.id].feedbackGiven = true;
+    item.classList.add('corrected');
+    status.style.opacity = 1;
+    checkOverallReady();
+  } catch(e) {
+    fbBody.textContent = 'Network error. Please try again.';
+  }
+  btn.disabled = false; btn.textContent = 'Re-check';
+}
+
+// ── Overall feedback ───────────────────────────────────────────────
+function checkOverallReady() {
+  const any = Object.values(corrections).some(c => c.feedbackGiven);
+  document.getElementById('overallSubmitBtn').disabled = !any;
+}
+
+document.getElementById('overallSubmitBtn').addEventListener('click', async () => {
+  const btn    = document.getElementById('overallSubmitBtn');
+  const fbDiv  = document.getElementById('overallFeedback');
+  const fbBody = document.getElementById('overallFeedbackBody');
+
+  btn.disabled = true; btn.textContent = 'Analysing…';
+  fbDiv.classList.add('visible');
+  fbBody.innerHTML = `<div class="thinking">Analysing all your corrections <div class="dot-anim"><span></span><span></span><span></span></div></div>`;
+
+  const summary = ERRORS.map(err => {
+    const val = corrections[err.id]?.value || '(not attempted)';
+    return `[${err.cat}] "${err.phrase}" → Student wrote: "${val}"`;
+  }).join('\n');
+
+  const prompt = `You are an IELTS Writing Task 2 examiner. A student corrected errors in their essay about junk food and education. Errors span four bands: LR, CC, GR, TR.
+
+Corrections:
+${summary}
+
+Write an overall assessment (5–7 sentences):
+1. Note approximately how many errors were corrected well.
+2. Highlight which categories they handled best.
+3. Identify which categories still need work.
+4. Give one concrete, actionable tip.
+Tone: warm, constructive, motivating. Plain prose only.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Could not get feedback.';
+    fbBody.textContent = text;
+  } catch(e) {
+    fbBody.textContent = 'Network error. Please try again.';
+  }
+  btn.disabled = false; btn.textContent = 'Refresh Overall Feedback';
+});
+
+// ── Helpers ────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getContext(phrase) {
+  const pos = ESSAY_RAW.indexOf(phrase);
+  if (pos === -1) return phrase;
+  const start = Math.max(0, pos - 60);
+  const end   = Math.min(ESSAY_RAW.length, pos + phrase.length + 60);
+  return (start > 0 ? '…' : '') + ESSAY_RAW.slice(start, end) + (end < ESSAY_RAW.length ? '…' : '');
+}
+
+function positionPopover(el) {
+  const popover = document.getElementById('popover');
+  const rect = el.getBoundingClientRect();
+  const sy   = window.scrollY || window.pageYOffset;
+  popover.style.display = 'block';
+  const pw = popover.offsetWidth;
+  let left = rect.left + (window.scrollX || 0);
+  if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+  if (left < 8) left = 8;
+  popover.style.left = left + 'px';
+  popover.style.top  = (rect.top + sy - popover.offsetHeight - 12) + 'px';
+}
+
+// ── Boot ───────────────────────────────────────────────────────────
+(async () => {
+  const dot    = document.getElementById('aiDot');
+  const status = document.getElementById('aiStatusText');
+  dot.className = 'ai-dot thinking';
+  status.textContent = 'Analysing essay…';
+
+  try {
+    const raw = await analyseEssay();
+
+    // Assign IDs
+    ERRORS = raw.map((e, i) => ({ ...e, id: 'e' + (i + 1) }));
+
+    // Filter to only those whose phrase actually appears in the essay
+    ERRORS = ERRORS.filter(e => ESSAY_RAW.indexOf(e.phrase) !== -1);
+
+    renderEssay(ERRORS);
+    buildCorrectionPanel(ERRORS);
+
+    dot.className = 'ai-dot active';
+    status.textContent = `${ERRORS.length} error${ERRORS.length !== 1 ? 's' : ''} found`;
+  } catch(err) {
+    dot.className = 'ai-dot';
+    status.textContent = 'Analysis failed — reload to retry';
+    document.getElementById('essayLoading').textContent = '⚠ Could not analyse essay. Please reload.';
+    console.error(err);
+  }
+})();
+</script>
+</body>
+</html>
